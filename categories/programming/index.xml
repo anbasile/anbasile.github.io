@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>programming on Angelo Basile</title>
+    <link>https://anbasile.github.io/categories/programming/</link>
+    <description>Recent content in programming on Angelo Basile</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 25 Dec 2015 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://anbasile.github.io/categories/programming/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Presentations on steroids</title>
+      <link>https://anbasile.github.io/posts/2015-12-25-hosting-reveal-pres-on-github/</link>
+      <pubDate>Fri, 25 Dec 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2015-12-25-hosting-reveal-pres-on-github/</guid>
+      <description>Learn how to combine reveal.js+pandoc+GitHub Pages to put together a great presentation.
+Summary Reveal.js is a great framework for producing awesome presentations. If you are reading this, then you are probably already familiar with it; if you don&amp;rsquo;t, and you give presentations using slides, then you should stop reading immediately and go read about Reveal here. This article explains how to host your presentations on GitHub pages. Check this page to see what the result looks like.</description>
+    </item>
+    
+  </channel>
+</rss>

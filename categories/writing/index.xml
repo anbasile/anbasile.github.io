@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>writing on Angelo Basile</title>
+    <link>https://anbasile.github.io/categories/writing/</link>
+    <description>Recent content in writing on Angelo Basile</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 10 Apr 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://anbasile.github.io/categories/writing/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Un manifesto per i manuali universitari</title>
+      <link>https://anbasile.github.io/posts/2017-04-10-manifesto-manuali/</link>
+      <pubDate>Mon, 10 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2017-04-10-manifesto-manuali/</guid>
+      <description>Allen Downey è docente di informatica presso l&amp;rsquo;Olin College (Needham, Massachusetts - USA) e autore di una fortunata serie di manuali di statistica. Qualche anno fa ha scritto un bel manifesto per i nuovi manuali universitari: lo traduco qui al volo con il permesso dell&amp;rsquo;autore. Qui trovate l&amp;rsquo;originale in inglese.
+ Il mio manifesto per i manuali universitari è così semplice da sembrare stupido: gli studenti dovrebbero poterli leggere e capire.</description>
+    </item>
+    
+  </channel>
+</rss>

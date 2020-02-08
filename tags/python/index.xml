@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>python on Angelo Basile</title>
+    <link>https://anbasile.github.io/tags/python/</link>
+    <description>Recent content in python on Angelo Basile</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Jun 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://anbasile.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Using jupyter notebooks with a virtual environment</title>
+      <link>https://anbasile.github.io/posts/2017-06-25-jupyter-venv/</link>
+      <pubDate>Sun, 25 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2017-06-25-jupyter-venv/</guid>
+      <description>Summary Do you use jupyter notebooks? And virtual environment too, right? And do you know how to use them together? Ah! I got you. It is very simple: follow this guide to learn how to install a custom kernel.
+Why? Using virtual environments is important:
+  it helps you to maintain your system clean: don&amp;rsquo;t install system-wide libraries that you are only going to use once for a small project</description>
+    </item>
+    
+  </channel>
+</rss>

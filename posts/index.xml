@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Angelo Basile</title>
+    <link>https://anbasile.github.io/posts/</link>
+    <description>Recent content in Posts on Angelo Basile</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 25 Jun 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://anbasile.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Using jupyter notebooks with a virtual environment</title>
+      <link>https://anbasile.github.io/posts/2017-06-25-jupyter-venv/</link>
+      <pubDate>Sun, 25 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2017-06-25-jupyter-venv/</guid>
+      <description>Summary Do you use jupyter notebooks? And virtual environment too, right? And do you know how to use them together? Ah! I got you. It is very simple: follow this guide to learn how to install a custom kernel.
+Why? Using virtual environments is important:
+  it helps you to maintain your system clean: don&amp;rsquo;t install system-wide libraries that you are only going to use once for a small project</description>
+    </item>
+    
+    <item>
+      <title>Un manifesto per i manuali universitari</title>
+      <link>https://anbasile.github.io/posts/2017-04-10-manifesto-manuali/</link>
+      <pubDate>Mon, 10 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2017-04-10-manifesto-manuali/</guid>
+      <description>Allen Downey è docente di informatica presso l&amp;rsquo;Olin College (Needham, Massachusetts - USA) e autore di una fortunata serie di manuali di statistica. Qualche anno fa ha scritto un bel manifesto per i nuovi manuali universitari: lo traduco qui al volo con il permesso dell&amp;rsquo;autore. Qui trovate l&amp;rsquo;originale in inglese.
+ Il mio manifesto per i manuali universitari è così semplice da sembrare stupido: gli studenti dovrebbero poterli leggere e capire.</description>
+    </item>
+    
+    <item>
+      <title>Presentations on steroids</title>
+      <link>https://anbasile.github.io/posts/2015-12-25-hosting-reveal-pres-on-github/</link>
+      <pubDate>Fri, 25 Dec 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/2015-12-25-hosting-reveal-pres-on-github/</guid>
+      <description>Learn how to combine reveal.js+pandoc+GitHub Pages to put together a great presentation.
+Summary Reveal.js is a great framework for producing awesome presentations. If you are reading this, then you are probably already familiar with it; if you don&amp;rsquo;t, and you give presentations using slides, then you should stop reading immediately and go read about Reveal here. This article explains how to host your presentations on GitHub pages. Check this page to see what the result looks like.</description>
+    </item>
+    
+  </channel>
+</rss>
