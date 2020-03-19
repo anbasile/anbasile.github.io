@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Angelo Basile  | Setting up a server for NLP models in production</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="generator" content="Hugo 0.66.0" />
+    
+    
+      <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+    
+
+    
+    
+      <link href="/dist/css/app.1cb140d8ba31d5b2f1114537dd04802a.css" rel="stylesheet">
+    
+
+    
+
+    
+      
+    
+
+    
+    
+    <meta property="og:title" content="Setting up a server for NLP models in production" />
+<meta property="og:description" content="Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
+Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anbasile.github.io/posts/serving-nlp-models/" />
+<meta property="article:published_time" content="2020-03-19T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-03-19T00:00:00+00:00" />
+<meta itemprop="name" content="Setting up a server for NLP models in production">
+<meta itemprop="description" content="Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
+Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia.">
+<meta itemprop="datePublished" content="2020-03-19T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-03-19T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="2645">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Setting up a server for NLP models in production"/>
+<meta name="twitter:description" content="Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
+Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia."/>
+
+      
+    
+  </head>
+
+  <body class="ma0 avenir bg-near-white production">
+
+    
+   
+  
+
+  
+  
+  <header class="cover bg-top" style="background-image: url('https://anbasile.github.io/images/undraw_maintenance_cn7j.png');">
+    <div class="pb3-m pb6-l bg-black-60">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="https://anbasile.github.io/" class="f3 fw2 hover-white no-underline white-90 dib">
+      Angelo Basile
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/about/" title="About page">
+              About
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/contact/" title="Contact page">
+              Contact
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white no-underline white-90" href="/posts/" title="Posts page">
+              Posts
+            </a>
+          </li>
+          
+        </ul>
+      
+      
+
+
+
+
+<a href="https://twitter.com/angelo_basile" target="_blank" class="link-transition twitter link dib z-999 pt3 pt0-l mr1" title="Twitter link" rel="noopener" aria-label="follow on Twitter——Opens in a new window">
+  <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+<span class="new-window"><svg  height="8px"  style="enable-background:new 0 0 1000 1000;" version="1.1" viewBox="0 0 1000 1000" width="8px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+<path d="M598 128h298v298h-86v-152l-418 418-60-60 418-418h-152v-86zM810 810v-298h86v298c0 46-40 86-86 86h-596c-48 0-86-40-86-86v-596c0-46 38-86 86-86h298v86h-298v596h596z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+</span></a>
+
+
+
+
+
+<a href="https://github.com/anbasile" target="_blank" class="link-transition github link dib z-999 pt3 pt0-l mr1" title="Github link" rel="noopener" aria-label="follow on Github——Opens in a new window">
+  <svg  height="32px"  style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+  <path d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"/>
+</svg>
+
+<span class="new-window"><svg  height="8px"  style="enable-background:new 0 0 1000 1000;" version="1.1" viewBox="0 0 1000 1000" width="8px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+<path d="M598 128h298v298h-86v-152l-418 418-60-60 418-418h-152v-86zM810 810v-298h86v298c0 46-40 86-86 86h-596c-48 0-86-40-86-86v-596c0-46 38-86 86-86h298v86h-298v596h596z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+</span></a>
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+      <div class="tc-l pv6 ph3 ph4-ns">
+        
+          <h1 class="f2 f1-l fw2 white-90 mb0 lh-title">Setting up a server for NLP models in production</h1>
+          
+        
+      </div>
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+
+    <header class="mt4 w-100">
+      <p class="f6 b helvetica tracked">
+          
+        POSTS
+      </p>
+      <h1 class="f1 athelas mb1">Setting up a server for NLP models in production</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2020-03-19T00:00:00Z">March 19, 2020</time>
+      
+      
+    </header>
+
+    <section class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><h2 id="summary">Summary</h2>
+<p>In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.</p>
+<p>Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-inference-server-guide/docs/">TensorRT Inference Server</a> (TRTIS from now on), developed by nvidia. I&rsquo;ll show how to deploy a model created with Tensorflow Keras, but TRTIS supports many popular ML model serialization formats, such as ONNX, PyTorch, and Caffe2.</p>
+<p>Here is what we&rsquo;ll be doing:</p>
+<ul>
+<li>train a sentiment analysis model and serialize it to disk</li>
+<li>setup TRTIS using docker</li>
+<li>deploy the sentiment analysis model</li>
+<li>send a few requests via HTTP to the inference server and get back the sentiment predictions</li>
+</ul>
+<p>A few important points:</p>
+<ul>
+<li>
+<p>I&rsquo;ll put everything under a <code>serving-nlp</code> folder:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ mkdir ~/serving-nlp/
+</code></pre></div></li>
+<li>
+<p>I assume that you already know how to define, train and evaluate models.</p>
+</li>
+</ul>
+<h2 id="train-a-sentiment-analysis-model">Train a sentiment analysis model</h2>
+<p>You can skip this step if you already have a trained model in SavedModel format at hand. If you don&rsquo;t, let&rsquo;s create one now. We&rsquo;ll train a simple model on the IMDB dataset to predict wether a text has positive or negative sentiment.</p>
+<p>Copy-paste the following code in a file called <code>train_model.py</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+__author__ <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Angelo Basile&#34;</span>
+__copyright__ <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Copyright 2020&#34;</span>
+__status__ <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Demo&#34;</span>
+
+<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+<span style="color:#f92672">import</span> tensorflow_datasets <span style="color:#f92672">as</span> tfds
+
+tf<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>set_seed(<span style="color:#ae81ff">42</span>)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_preprocess</span>(text: tf<span style="color:#f92672">.</span>string)<span style="color:#f92672">-&gt;</span>tf<span style="color:#f92672">.</span>Tensor:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        This function vectorizes the text, separating
+</span><span style="color:#e6db74">        strings into tokens at every white-space and then
+</span><span style="color:#e6db74">        using a hashing function to map tokens to ids.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    tokens <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>strings<span style="color:#f92672">.</span>split(text, <span style="color:#e6db74">&#39; &#39;</span>)
+    ids <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>strings<span style="color:#f92672">.</span>to_hash_bucket_fast(tokens, <span style="color:#ae81ff">19999</span>)
+    <span style="color:#66d9ef">return</span> ids<span style="color:#f92672">.</span>to_tensor(default_value<span style="color:#f92672">=</span><span style="color:#ae81ff">20000</span>)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">build_model</span>()<span style="color:#f92672">-&gt;</span>tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>Model:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">      This function creates a simple model using a pooled embedding representation of the input and a dense layer.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+
+    input_layer <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Input(shape<span style="color:#f92672">=</span>(), dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>string)
+    h <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Lambda(_preprocess)(input_layer)
+    h <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Embedding(<span style="color:#ae81ff">20001</span>, <span style="color:#ae81ff">1</span>)(h)
+    h <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>GlobalAveragePooling1D()(h)
+    output_layer <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">2</span>, <span style="color:#e6db74">&#39;softmax&#39;</span>)(h)
+
+    model <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>Model(
+        inputs<span style="color:#f92672">=</span>input_layer, 
+        outputs<span style="color:#f92672">=</span>output_layer)
+
+    model<span style="color:#f92672">.</span>compile(
+        optimizer<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;adam&#39;</span>,
+        loss<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sparse_categorical_crossentropy&#39;</span>,
+        metrics<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;accuracy&#39;</span>])
+
+    <span style="color:#66d9ef">return</span> model
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
+
+    data <span style="color:#f92672">=</span> tfds<span style="color:#f92672">.</span>load(
+        name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;imdb_reviews&#39;</span>, 
+        split<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;train&#39;</span>, 
+        as_supervised<span style="color:#f92672">=</span>True)
+
+    texts, labels <span style="color:#f92672">=</span> zip(<span style="color:#f92672">*</span>tfds<span style="color:#f92672">.</span>as_numpy(data))
+
+    <span style="color:#75715e"># let&#39;s convert bytes to strings first</span>
+    texts <span style="color:#f92672">=</span> [x<span style="color:#f92672">.</span>decode(<span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> texts]
+
+    labels <span style="color:#f92672">=</span> [x<span style="color:#f92672">.</span>item() <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> labels]
+
+    model <span style="color:#f92672">=</span> build_model()
+
+    model<span style="color:#f92672">.</span>fit(x<span style="color:#f92672">=</span>texts, y<span style="color:#f92672">=</span>labels,epochs<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span>)
+
+    <span style="color:#75715e"># serialize to disk using the SavedModel format</span>
+    model<span style="color:#f92672">.</span>save(
+        filepath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;./sentiment-model/&#39;</span>,
+        save_format<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tf&#39;</span>)
+
+    loaded_model <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>models<span style="color:#f92672">.</span>load_model(
+        <span style="color:#e6db74">&#39;./sentiment-model/&#39;</span>)
+
+    test_sentences <span style="color:#f92672">=</span> [
+        <span style="color:#e6db74">&#39;I loved the pizza&#39;</span>,
+        <span style="color:#e6db74">&#39;I hated the pizza&#39;</span>]
+
+    <span style="color:#75715e"># [[4.1961043e-26 1.0000000e+00] [3.0753494e-03 9.9692470e-01]]</span>
+    predicted_probabilities <span style="color:#f92672">=</span> loaded_model<span style="color:#f92672">.</span>predict(test_sentences)
+
+    <span style="color:#75715e"># [&#39;positive&#39;, &#39;negative&#39;]</span>
+    labels <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;positive&#39;</span> <span style="color:#66d9ef">if</span> x <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">else</span> <span style="color:#e6db74">&#39;negative&#39;</span> <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> tf<span style="color:#f92672">.</span>argmax(predicted_probabilities)]
+
+    <span style="color:#66d9ef">assert</span> labels[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;positive&#39;</span> <span style="color:#75715e"># I loved the pizza</span>
+    <span style="color:#66d9ef">assert</span> labels[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;negative&#39;</span> <span style="color:#75715e"># I hated the pizza</span>
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    main()
+</code></pre></div><p>Let&rsquo;s train the model:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ python train_model.py
+
+<span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
+Train on <span style="color:#ae81ff">25000</span> samples
+Epoch 1/15
+25000/25000 <span style="color:#f92672">[==============================]</span> - 5s 194us/sample - loss: 0.6923 - accuracy: 0.5393
+Epoch 2/15
+25000/25000 <span style="color:#f92672">[==============================]</span> - 4s 172us/sample - loss: 0.6895 - accuracy: 0.6490
+Epoch 3/15
+25000/25000 <span style="color:#f92672">[==============================]</span> - 4s 171us/sample - loss: 0.6853 - accuracy: 0.6718
+<span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
+Epoch 15/15
+25000/25000 <span style="color:#f92672">[==============================]</span> - 4s 169us/sample - loss: 0.5142 - accuracy: 0.8254
+</code></pre></div><p>Ok, we have a sentiment analysis model: it is 82% accurate on the balanced training dataset. Not bad. If you don&rsquo;t use a GPU, you should see exactly these same numbers, since we set the random seed.</p>
+<p>Note that we used the <a href="https://www.tensorflow.org/guide/saved_model">SavedModel</a> format for serializing the trained model to disk: this will make it easy to deploy the model on the inference server. SavedModel is the new default serialization format for Tensorflow 2.0 and tf.Keras and it replaces the hdf5 format. The output is a folder and not a single file, like it was for hdf5. The SavedModel format has the advantage of not requiring extra logic for the serialization of things like custom layers and other assets: when you are moving things in production, having less artifacts, files and objects to manage is a nice plus, since this often requires extra work.</p>
+<p>If you ran the code above as is, you should now have a folder called <code>./sentiment-model/</code> with the following content:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ tree ~/serving-nlp/sentiment-model/
+
+sentiment-model/
+├── assets
+├── saved_model.pb
+└── variables
+    ├── variables.data-00000-of-00001
+    └── variables.index
+
+<span style="color:#ae81ff">2</span> directories, <span style="color:#ae81ff">3</span> files
+</code></pre></div><h2 id="create-a-model-repository-folder">Create a model repository folder</h2>
+<p>Now let&rsquo;s create a directory where we will be putting the models we want to serve:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mkdir ~/serving-nlp/model_repository/
+</code></pre></div><p>Now everything is ready: we just have to start the inference server and tell TRTIS to serve all the models contained in this folder.</p>
+<p>The model repository will have to be structured in a precise way and we&rsquo;ll see how later. Now let&rsquo;s just start the server.</p>
+<h2 id="run-trtis-using-docker">Run TRTIS using Docker</h2>
+<p>The simplest way to setup an inference server is by using docker to get the nvidia TRTIS image:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker pull nvcr.io/nvidia/tensorrtserver:20.02-py3
+20.02-py3: Pulling from nvidia/tensorrtserver
+5c939e3a4d10: Pulling fs layer 
+c63719cdbe7a: Pulling fs layer 
+<span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
+fcda33dadb60: Pull complete 
+Digest: sha256:603c8b201481f84698229d4c1310f63181b1fe4da170d42e91a012ffdbd3446e
+Status: Downloaded newer image <span style="color:#66d9ef">for</span> nvcr.io/nvidia/tensorrtserver:20.02-py3
+nvcr.io/nvidia/tensorrtserver:20.02-py3
+</code></pre></div><p>This will take a while. Once it&rsquo;s done, you can run the image with either docker or nvidia-docker, depending on wether you have and/or need a GPU or not. Contrary to what you might think, it is often the case that you <em>don&rsquo;t</em> want to use a GPU in production, since you might want to use a cheap CPU-only VM and not be bounded by costly GPUs.</p>
+<p>If you don&rsquo;t have or don&rsquo;t need a GPU, start the server with the following command:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --rm <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --shm-size<span style="color:#f92672">=</span>1g <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --ulimit memlock<span style="color:#f92672">=</span>-1 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --ulimit stack<span style="color:#f92672">=</span><span style="color:#ae81ff">67108864</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p8000:8000 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p8001:8001 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p8002:8002 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v ~/serving-nlp/model_repository:/models <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  nvcr.io/nvidia/tensorrtserver:20.02-py3 trtserver <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --model-repository<span style="color:#f92672">=</span>/models <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --strict-model-config<span style="color:#f92672">=</span>false
+</code></pre></div><p>&hellip;and if you need the server to use a GPU, just replace <code>docker</code> with <code>nvidia-docker</code> in the command above. Alternatively, you can use the <code>docker-compose.yml</code> file that I provided for you <a href="https://github.com/anbasile/serving-nlp/blob/master/docker-compose.yml">here</a>.</p>
+<p>At this point you should have a server running. To verify that everything is working fine, we can just call the <code>/status</code> endpoint of the server using <code>curl</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl localhost:8000/api/status
+id: <span style="color:#e6db74">&#34;inference:0&#34;</span>
+version: <span style="color:#e6db74">&#34;1.11.0&#34;</span>
+uptime_ns: <span style="color:#ae81ff">14323563681</span>
+ready_state: SERVER_READY
+</code></pre></div><p>Perfect! The inference server is ready. Let&rsquo;s deploy our model.</p>
+<h2 id="deploy-the-sentiment-analysis-model">Deploy the sentiment analysis model</h2>
+<p>TRTIS will by default load and serve all the models inside the folder defined as model repository, i.e. <code>~/serving-nlp/model_repository</code> in our case. Therefore all we need to do is to move our sentiment analysis model inside the repository:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mv ./sentiment-model ~/model_repository
+</code></pre></div><p>At this point, it will not yet work: TRTIS expects our folder to be structured in a precise way: we have to create one folder for each version of the same model that we want to create and such folders must be given the version number as name. The version folder must then contain another folder, having as name the platform of the model, e.g. model.savedmodel if we used the SavedModel format. Here is how we&rsquo;ll be structuring our model repository:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">.
+├── model_repository
+│   └── sentiment-model
+│       └── <span style="color:#ae81ff">1</span>
+│           └── model.savedmodel
+│               ├── assets
+│               ├── saved_model.pb
+│               └── variables
+│                   ├── variables.data-00000-of-00001
+│                   └── variables.index
+└── train_model.py
+
+<span style="color:#ae81ff">6</span> directories, <span style="color:#ae81ff">4</span> files
+
+</code></pre></div><p>So, let&rsquo;s fix this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ mkdir -p ~/serving-nlp/model_repository/sentiment-model/1/model.savedmodel
+$ mv model_repository/sentiment-model/assets/ model_repository/sentiment-model/1/model.savedmodel/
+$ mv model_repository/sentiment-model/variables/ model_repository/sentiment-model/1/model.savedmodel/
+$ mv model_repository/sentiment-model/saved_model.pb model_repository/sentiment-model/1/model.savedmodel/
+$ tree model_repository/
+
+model_repository/
+└── sentiment-model
+    └── <span style="color:#ae81ff">1</span>
+        └── model.savedmodel
+            ├── assets
+            ├── saved_model.pb
+            └── variables
+                ├── variables.data-00000-of-00001
+                └── variables.index
+
+<span style="color:#ae81ff">5</span> directories, <span style="color:#ae81ff">3</span> files
+</code></pre></div><p>By default, TRTIS will watch the model repository and automatically load new models. We can now try to query the <code>/status</code> endpoint again:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ curl localhost:8000/api/status
+id: <span style="color:#e6db74">&#34;inference:0&#34;</span>
+version: <span style="color:#e6db74">&#34;1.11.0&#34;</span>
+uptime_ns: <span style="color:#ae81ff">109453253681</span>
+model_status <span style="color:#f92672">{</span>
+  key: <span style="color:#e6db74">&#34;sentiment-model&#34;</span>
+  value <span style="color:#f92672">{</span>
+    config <span style="color:#f92672">{</span>
+      name: <span style="color:#e6db74">&#34;sentiment-model&#34;</span>
+      platform: <span style="color:#e6db74">&#34;tensorflow_savedmodel&#34;</span>
+      version_policy <span style="color:#f92672">{</span>
+        latest <span style="color:#f92672">{</span>
+          num_versions: <span style="color:#ae81ff">1</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+      max_batch_size: <span style="color:#ae81ff">1</span>
+      input <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;input_1&#34;</span>
+        data_type: TYPE_STRING
+        dims: <span style="color:#ae81ff">1</span>
+        reshape <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+      output <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;dense&#34;</span>
+        data_type: TYPE_FP32
+        dims: <span style="color:#ae81ff">2</span>
+      <span style="color:#f92672">}</span>
+      instance_group <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;sentiment-model&#34;</span>
+        count: <span style="color:#ae81ff">1</span>
+        kind: KIND_CPU
+      <span style="color:#f92672">}</span>
+      default_model_filename: <span style="color:#e6db74">&#34;model.savedmodel&#34;</span>
+      optimization <span style="color:#f92672">{</span>
+        input_pinned_memory <span style="color:#f92672">{</span>
+          enable: true
+        <span style="color:#f92672">}</span>
+        output_pinned_memory <span style="color:#f92672">{</span>
+          enable: true
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    version_status <span style="color:#f92672">{</span>
+      key: <span style="color:#ae81ff">1</span>
+      value <span style="color:#f92672">{</span>
+        ready_state: MODEL_READY
+        ready_state_reason <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+ready_state: SERVER_READY
+
+</code></pre></div><p>As we can see from the response, the server says that our <code>sentiment-model</code>'s status is <code>MODEL_READY</code>: perfect, we have succesfully deployed our model.</p>
+<h3 id="the-config-file">The config file</h3>
+<p>The output of our query to <code>/status</code> above contains a field called <code>config</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
+    config <span style="color:#f92672">{</span>
+      name: <span style="color:#e6db74">&#34;sentiment-model&#34;</span>
+      platform: <span style="color:#e6db74">&#34;tensorflow_savedmodel&#34;</span>
+      version_policy <span style="color:#f92672">{</span>
+        latest <span style="color:#f92672">{</span>
+          num_versions: <span style="color:#ae81ff">1</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+      max_batch_size: <span style="color:#ae81ff">1</span>
+      input <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;input_1&#34;</span>
+        data_type: TYPE_STRING
+        dims: <span style="color:#ae81ff">1</span>
+        reshape <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+      output <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;dense&#34;</span>
+        data_type: TYPE_FP32
+        dims: <span style="color:#ae81ff">2</span>
+      <span style="color:#f92672">}</span>
+      instance_group <span style="color:#f92672">{</span>
+        name: <span style="color:#e6db74">&#34;sentiment-model&#34;</span>
+        count: <span style="color:#ae81ff">1</span>
+        kind: KIND_CPU
+      <span style="color:#f92672">}</span>
+      default_model_filename: <span style="color:#e6db74">&#34;model.savedmodel&#34;</span>
+      optimization <span style="color:#f92672">{</span>
+        input_pinned_memory <span style="color:#f92672">{</span>
+          enable: true
+        <span style="color:#f92672">}</span>
+        output_pinned_memory <span style="color:#f92672">{</span>
+          enable: true
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
+</code></pre></div><p>TRTIS needs a model configuration file for each model deployed: for some models, the server can build one automatically.</p>
+<p>The config you see here was generated automatically by the inference server, but we want to modify it: if we query the model with this config, we&rsquo;ll get back only the probabilities for the classes, but we want the class labels, i.e. &lsquo;positive&rsquo; or &lsquo;negative&rsquo; depending on the text&rsquo;s sentiment.</p>
+<p>So, let create the config manually:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">touch ~/serving-nlp/model-repository/sentiment-model/config.pbtxt
+</code></pre></div><p>Furthermore, we need a file containing the labels that we want to predict:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">touch ~/serving-nlp/model-repository/sentiment-model/labels.txt
+</code></pre></div><p>In our case, the file <code>labels.txt</code> will contain only two rows, since we only have two labels in output:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">negative
+positive
+</code></pre></div><p>Note that order matters here: we are saying something like <em>map class 0 to negative and class 1 to positive</em>.</p>
+<p>Now let&rsquo;s copy paste the following inside <code>config.pbtxt</code>:</p>
+<pre><code>name: &quot;sentiment-model&quot;
+platform: &quot;tensorflow_savedmodel&quot;
+max_batch_size: 1
+input [
+  {
+    name: &quot;input_1&quot;
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+    reshape {}
+  }
+]
+output [
+  {
+    name: &quot;dense&quot;
+    data_type: TYPE_FP32
+    dims: [ 2 ]
+    label_filename: &quot;labels.txt&quot;
+  }
+]
+</code></pre><p>More information about the model configuration can be found <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-inference-server-guide/docs/model_configuration.html">here</a>.</p>
+<h2 id="query-the-model-and-parse-the-output">Query the model and parse the output</h2>
+<p>Now, to consume the API we can either use the <a href="https://docs.nvidia.com/deeplearning/sdk/tensorrt-inference-server-guide/docs/client_example.html">client provided by nvidia</a> or write our own from scratch: we&rsquo;ll take this second option for two reasons: <em>a</em>) at the time of writing this article, it is not possible to build the client for Windows and <em>b</em>) by building the client ourself we get to better understand how it works. nvidia also provides a convenient docker image for running the client, but if, for example, we want to send the requests via javascript from a simple web page, that would still make things more complicated than they should be. So let&rsquo;s just build a simple client from scratch.</p>
+<h3 id="text-pre-processing">Text pre-processing</h3>
+<p>First, at test time we have to provide to our model the exact same input that we provided during training and therefore if, for example, we lowercased our text, lemmatized and vectorized it using a custom word-tokenizer, then we&rsquo;ll have to apply this exact same procedure when querying the model with new data, otherwise we&rsquo;ll get wrong predictions or it might be even impossible for the model to accept the input. Now, we did nothing of this sort for our model, since we fed it raw text and transformed the text <em>inside</em> the model, using a custom Lambda layer leveraging a simple string splitting tensor function and then we hashed the words, avoiding the need to carry around a word-to-index mapping. This solution makes our life easy in production: we can just send text to our model!
+So, no text pre-processing to do.</p>
+<h3 id="preparing-the-http-request">Preparing the HTTP request</h3>
+<p>That said, at the time of writing TRTIS is not really straight-forward to use, if you want to build the request yourself. There are few details that we have to get right.</p>
+<p>First, we&rsquo;ll have to send bytes and not json and therefore we&rsquo;ll start by encoding our test sentence into byte format and that&rsquo;s easy to do:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">test_sentences <span style="color:#f92672">=</span> [
+  <span style="color:#e6db74">&#39;I loved the pizza&#39;</span>, 
+  <span style="color:#e6db74">&#39;I hated the pizza&#39;</span>]
+
+byte_encoded_sentences <span style="color:#f92672">=</span> [
+  sentence<span style="color:#f92672">.</span>encode() <span style="color:#66d9ef">for</span> sentence <span style="color:#f92672">in</span> test_sentences]
+
+<span style="color:#66d9ef">assert</span> isinstance(byte_encoded_sentences[<span style="color:#ae81ff">0</span>], bytes) <span style="color:#75715e"># True</span>
+
+<span style="color:#75715e"># alternatively, you can use the b&#39;string&#39; syntax</span>
+<span style="color:#66d9ef">assert</span> isinstance(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;I loved the pizza&#39;</span>, bytes) 
+</code></pre></div><p>When sending strings as input, TRTIS wants to know the length of the string as well and we have to pass this information by encoding it into a 4-byte format and prepending it to the actual string:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">string <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;I loved the pizza&#39;</span> <span style="color:#75715e"># our byte-encoded string</span>
+
+string_length <span style="color:#f92672">=</span> len(string)
+
+byte_encoded_string_length <span style="color:#f92672">=</span> string_length<span style="color:#f92672">.</span>to_bytes(<span style="color:#ae81ff">4</span>, <span style="color:#e6db74">&#39;little&#39;</span>)
+
+<span style="color:#75715e"># prepend length to actual string</span>
+data <span style="color:#f92672">=</span> string_length <span style="color:#f92672">+</span> byte_encoded_texts <span style="color:#75715e"># this is what we&#39;ll send to TRTIS </span>
+
+<span style="color:#75715e"># we will also need to compute the whole content length</span>
+content_length <span style="color:#f92672">=</span> len(data)
+</code></pre></div><p>Now let&rsquo;s start preparing the HTTP request. We&rsquo;ll be using the <a href="https://requests.readthedocs.io/en/master/">requests</a> library:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> requests
+
+url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;http://localhost:8000/api/infer/sentiment-model&#39;</span>
+
+params<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;format&#39;</span>: <span style="color:#e6db74">&#39;binary&#39;</span>}
+
+headers<span style="color:#f92672">=</span>{
+    <span style="color:#e6db74">&#39;Content-Type&#39;</span>: <span style="color:#e6db74">&#39;application/octet-stream&#39;</span>,
+    <span style="color:#e6db74">&#39;Accept&#39;</span>: <span style="color:#e6db74">&#39;*/*&#39;</span>,
+    <span style="color:#e6db74">&#39;Host&#39;</span>: <span style="color:#e6db74">&#39;localhost:8000&#39;</span>,
+    <span style="color:#e6db74">&#39;NV-InferRequest&#39;</span>:
+        <span style="color:#e6db74">&#39;batch_size: 1 </span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span><span style="color:#e6db74">        input { name: &#34;input_1&#34; dims: 1 batch_byte_size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74"> } </span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span><span style="color:#e6db74">        output { name: &#34;dense&#34; cls { count : 1 } }&#39;</span> <span style="color:#f92672">%</span> content_length}
+
+response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(
+  url<span style="color:#f92672">=</span>url,
+  params<span style="color:#f92672">=</span>params
+  headers<span style="color:#f92672">=</span>headers,
+  data<span style="color:#f92672">=</span>data)
+</code></pre></div><p>TRTIS&rsquo; response will not be json-formatted: the format of the provided output is called <a href="https://developers.google.com/protocol-buffers">protocol buffer</a> and parsing it not as straightforward as parsing json, but it&rsquo;s not that complicated either: we&rsquo;ll see how to properly parse it in another post. For now, we can just use a regular expression to capture the labels predicted by the model, so we&rsquo;ll just read the response as text:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># this will be either [&#39;positive&#39;] or [&#39;negative&#39;]</span>
+labels <span style="color:#f92672">=</span> (re<span style="color:#f92672">.</span>findall(<span style="color:#e6db74">&#39;(positive|negative)&#39;</span>, response<span style="color:#f92672">.</span>text) 
+</code></pre></div><p>Now we are ready to put this all together in a file called <code>query_model.py</code>: we&rsquo;ll be reading 10 instances from the test split of the IMDB dataset, the same that we used for training the model, we&rsquo;ll prepare the request, get the labels and compute the accuracy and the time it will take:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> re
+<span style="color:#f92672">import</span> requests
+<span style="color:#f92672">import</span> tensorflow_datasets <span style="color:#f92672">as</span> tfds
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">predict</span>(byte_encoded_texts: bytes) <span style="color:#f92672">-&gt;</span> str:
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">        This function calls the TRTIS server,
+</span><span style="color:#e6db74">        sending text encoded as byte and gives back
+</span><span style="color:#e6db74">        a label, either &#39;positive&#39; or &#39;negative&#39;, depending
+</span><span style="color:#e6db74">        on the sentiment of the text.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+
+    <span style="color:#75715e"># encode length of string as byte</span>
+    string_length <span style="color:#f92672">=</span> len(byte_encoded_texts)<span style="color:#f92672">.</span>to_bytes(<span style="color:#ae81ff">4</span>, <span style="color:#e6db74">&#39;little&#39;</span>)
+
+    <span style="color:#75715e"># prepend length to actula string</span>
+    data <span style="color:#f92672">=</span> string_length <span style="color:#f92672">+</span> byte_encoded_texts
+
+    <span style="color:#75715e"># compute the complete content length</span>
+    content_length <span style="color:#f92672">=</span> len(data)
+
+    response <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(
+        url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;http://localhost:8000/api/infer/sentiment-model&#39;</span>,
+        params<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;format&#39;</span>: <span style="color:#e6db74">&#39;binary&#39;</span>},
+        headers<span style="color:#f92672">=</span>{
+            <span style="color:#e6db74">&#39;Content-Type&#39;</span>: <span style="color:#e6db74">&#39;application/octet-stream&#39;</span>,
+            <span style="color:#e6db74">&#39;Accept&#39;</span>: <span style="color:#e6db74">&#39;*/*&#39;</span>,
+            <span style="color:#e6db74">&#39;Host&#39;</span>: <span style="color:#e6db74">&#39;localhost:8000&#39;</span>,
+            <span style="color:#e6db74">&#39;NV-InferRequest&#39;</span>:
+                <span style="color:#e6db74">&#39;batch_size: 1 </span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span><span style="color:#e6db74">                input { name: &#34;input_1&#34; dims: 1 batch_byte_size: </span><span style="color:#e6db74">%s</span><span style="color:#e6db74"> } </span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span><span style="color:#e6db74">                output { name: &#34;dense&#34; cls { count : 1 } }&#39;</span> <span style="color:#f92672">%</span> content_length},
+        data<span style="color:#f92672">=</span>data)
+    <span style="color:#66d9ef">if</span> response<span style="color:#f92672">.</span>ok:
+        labels <span style="color:#f92672">=</span> (re<span style="color:#f92672">.</span>findall(<span style="color:#e6db74">&#39;(positive|negative)&#39;</span>, response<span style="color:#f92672">.</span>text))
+    <span style="color:#66d9ef">else</span>:
+        labels <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;&#39;</span>]
+    <span style="color:#66d9ef">return</span> labels[<span style="color:#ae81ff">0</span>]
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>():
+    data <span style="color:#f92672">=</span> tfds<span style="color:#f92672">.</span>load(
+        name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;imdb_reviews&#39;</span>,
+        split<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;test&#39;</span>,
+        as_supervised<span style="color:#f92672">=</span>True)
+
+    texts, labels <span style="color:#f92672">=</span> zip(<span style="color:#f92672">*</span>tfds<span style="color:#f92672">.</span>as_numpy(data))
+
+    <span style="color:#66d9ef">assert</span> isinstance(texts[<span style="color:#ae81ff">0</span>], bytes)
+
+    labels <span style="color:#f92672">=</span> [x<span style="color:#f92672">.</span>item() <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> labels[:<span style="color:#ae81ff">10</span>]]
+
+    labels <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;positive&#39;</span> <span style="color:#66d9ef">if</span> x <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">else</span> <span style="color:#e6db74">&#39;negative&#39;</span> <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> labels]
+
+    predictions <span style="color:#f92672">=</span> [predict(t) <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> texts[:<span style="color:#ae81ff">10</span>]]
+
+    accuracy <span style="color:#f92672">=</span> sum([x <span style="color:#f92672">==</span> y <span style="color:#66d9ef">for</span> x, y <span style="color:#f92672">in</span> zip(predictions[:<span style="color:#ae81ff">10</span>], labels[:<span style="color:#ae81ff">10</span>])])<span style="color:#f92672">/</span><span style="color:#ae81ff">10</span>
+
+    <span style="color:#66d9ef">print</span>(accuracy)
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+    run()
+
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ python query_model.py
+Accuracy: 0.9
+Elapsed time <span style="color:#f92672">(</span>seconds<span style="color:#f92672">)</span>: 0.10172700881958008
+</code></pre></div><p>We can see that it took a tenth of a second to classify 10 instances: the server and the client have both been running on a 2015 i7-powered ultrabook with 8 GB of RAM and no GPU. The accuracy is in line with what we saw during training and everything seems to be working fine. But: this is super slow! This inference time is hardly acceptable in a production environment: the main reason for the inference server being apparently slow, is that we are not batching our requests. We&rsquo;ll see how to modify the model for this in an upcoming post. Stay tuned!</p>
+<h2 id="recap">Recap</h2>
+<ul>
+<li>train model and serialize with SavedModel format</li>
+<li>create a folder to store models and put the saved model inside</li>
+<li>start TRTIS using docker</li>
+<li>hack around to send HTTP requetst</li>
+<li>find here all the code 👉 <a href="https://github.com/anbasile/serving-nlp">https://github.com/anbasile/serving-nlp</a></li>
+</ul>
+<h2 id="cool-can-you-show-me-the-thing-step-by-step">Cool, can you show me the thing step-by-step?</h2>
+<p>Sure 🍿.</p>
+<p><a href="https://asciinema.org/a/311662"><img src="https://asciinema.org/a/311662.svg" alt="asciicast"></a></p>
+<h2 id="did-you-like-this-article">Did you like this article?</h2>
+<p>Leave your email and I&rsquo;ll send the next one I write directly to your inbox 📫.<!-- raw HTML omitted --></p>
+<p>Do you want to discuss the content with me? I&rsquo;d be happy to hear from you: hit me on twitter <a href="https://twitter.com/angelo_basile">@angelo_basile</a> or send me an <a href="https://anbasile.github.io/contact/">email</a>.</p>
+<div>
+    <script async data-uid="862f57681d" src="https://unique-thinker-1780.ck.page/862f57681d/index.js"></script>
+</div>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6">
+      
+      
+      </div>
+    </section>
+
+    <aside class="w-30-l mt6-l"><div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
+    <p class="f5 b mb3">What&#39;s in this posts</p>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#train-a-sentiment-analysis-model">Train a sentiment analysis model</a></li>
+    <li><a href="#create-a-model-repository-folder">Create a model repository folder</a></li>
+    <li><a href="#run-trtis-using-docker">Run TRTIS using Docker</a></li>
+    <li><a href="#deploy-the-sentiment-analysis-model">Deploy the sentiment analysis model</a>
+      <ul>
+        <li><a href="#the-config-file">The config file</a></li>
+      </ul>
+    </li>
+    <li><a href="#query-the-model-and-parse-the-output">Query the model and parse the output</a>
+      <ul>
+        <li><a href="#text-pre-processing">Text pre-processing</a></li>
+        <li><a href="#preparing-the-http-request">Preparing the HTTP request</a></li>
+      </ul>
+    </li>
+    <li><a href="#recap">Recap</a></li>
+    <li><a href="#cool-can-you-show-me-the-thing-step-by-step">Cool, can you show me the thing step-by-step?</a></li>
+    <li><a href="#did-you-like-this-article">Did you like this article?</a></li>
+  </ul>
+</nav>
+  </div>
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="https://anbasile.github.io/" >
+    &copy;  Angelo Basile 2020 
+  </a>
+    <div>
+
+
+
+
+<a href="https://twitter.com/angelo_basile" target="_blank" class="link-transition twitter link dib z-999 pt3 pt0-l mr1" title="Twitter link" rel="noopener" aria-label="follow on Twitter——Opens in a new window">
+  <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+<span class="new-window"><svg  height="8px"  style="enable-background:new 0 0 1000 1000;" version="1.1" viewBox="0 0 1000 1000" width="8px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+<path d="M598 128h298v298h-86v-152l-418 418-60-60 418-418h-152v-86zM810 810v-298h86v298c0 46-40 86-86 86h-596c-48 0-86-40-86-86v-596c0-46 38-86 86-86h298v86h-298v596h596z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+</span></a>
+
+
+
+
+
+<a href="https://github.com/anbasile" target="_blank" class="link-transition github link dib z-999 pt3 pt0-l mr1" title="Github link" rel="noopener" aria-label="follow on Github——Opens in a new window">
+  <svg  height="32px"  style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+  <path d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"/>
+</svg>
+
+<span class="new-window"><svg  height="8px"  style="enable-background:new 0 0 1000 1000;" version="1.1" viewBox="0 0 1000 1000" width="8px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+<path d="M598 128h298v298h-86v-152l-418 418-60-60 418-418h-152v-86zM810 810v-298h86v298c0 46-40 86-86 86h-596c-48 0-86-40-86-86v-596c0-46 38-86 86-86h298v86h-298v596h596z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+</span></a>
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+    
+
+  <script src="/dist/js/app.3fc0f988d21662902933.js"></script>
+
+
+  </body>
+</html>

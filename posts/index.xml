@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Angelo Basile</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Jun 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://anbasile.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Setting up a server for NLP models in production</title>
+      <link>https://anbasile.github.io/posts/serving-nlp-models/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/serving-nlp-models/</guid>
+      <description>Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
+Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia.</description>
+    </item>
     
     <item>
       <title>Using jupyter notebooks with a virtual environment</title>
