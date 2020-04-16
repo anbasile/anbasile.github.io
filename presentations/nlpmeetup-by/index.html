@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>NLP in production</title>
+<meta name="author" content="(Angelo Basile)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/npm/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<meta name="description" content="NLP in production presentation">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><div><h2>NLP in production</h2><h4><i>A couple things to think about</i></h4></div> <p>Angelo Basile</p> <p>17-04-2020</p>
+</section>
+
+
+<section>
+<section id="slide-orgc5a3f8f">
+<h2 id="orgc5a3f8f">About me</h2>
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/1iW2g0lzwdRqNu3m/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+
+<p>
+Junior research scientist at Symanto Research GmbH.
+</p>
+
+<p>
+<a href="http://angelobasile.it">http://angelobasile.it</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org4862531">
+<h3 id="org4862531">api.symanto.net/docs</h3>
+
+<div class="figure">
+<p><img src="img/symanto.png" alt="symanto.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org5c302aa">
+<h2 id="org5c302aa">Outline</h2>
+<ul>
+<li class="fragment appear">Large models perform well, but how to use them at scale?</li>
+<li class="fragment appear">How to monitor their performance on new, streaming data?</li>
+<li class="fragment appear">How can we simplify the infrastructure required by these models?</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orge79577a">
+<h2 id="orge79577a">Background</h2>
+</section>
+<section id="slide-orge79577a-split">
+<p>
+"<i>As the machine learning (ML) community continues to accumulate years of experience with live systems, a wide-spread and uncomfortable trend has emerged: developing and deploying ML systems is relatively fast and cheap, but maintaining them over time is difficult and expensive</i>".
+</p>
+
+<p>
+(Sculley, et al., 2015)
+</p>
+
+</section>
+<section id="slide-orge79577a-split">
+
+
+<div class="figure">
+<p><img src="img/htdiml.png" alt="htdiml.png" />
+</p>
+</div>
+
+<p>
+(from Sculley, et al. 2015)
+</p>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org10303f5">
+<h2 id="org10303f5">Large models</h2>
+<p>
+Works well, but&#x2026;
+</p>
+
+<ul>
+<li class="fragment appear">GPU intensive</li>
+<li class="fragment appear">slow, e.g. \(O(n^2)\)</li>
+<li class="fragment appear">large, e.g. &gt; 400 MB</li>
+
+</ul>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org5b7ddd0">
+<h2 id="org5b7ddd0">What to do about large models?</h2>
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/xTk9ZP2IPCyHl1JSP6/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org27f47e2">
+<h3 id="org27f47e2">Use something else</h3>
+
+<div class="figure">
+<p><img src="img/sha-rnn.png" alt="sha-rnn.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org27f47e2-split">
+
+<div class="figure">
+<p><img src="img/lmao.png" alt="lmao.png" />
+</p>
+</div>
+
+<p>
+(Source: <a href="https://explosion.ai/blog/spacy-v2-1">https://explosion.ai/blog/spacy-v2-1</a>)
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1af374f">
+<h3 id="org1af374f">Quantize</h3>
+
+<div class="figure">
+<p><img src="img/q8bit-bert.png" alt="q8bit-bert.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org1af374f-split">
+
+
+<div class="figure">
+<p><img src="img/tfquantize.png" alt="tfquantize.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org1af374f-split">
+
+<div class="figure">
+<p><img src="img/tfquantize-2.png" alt="tfquantize-2.png" />
+</p>
+</div>
+
+<p>
+(Source: tensorflow.org)
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org885c9d0">
+<h3 id="org885c9d0">Dropout</h3>
+
+<div class="figure">
+<p><img src="img/layer-dropout.png" alt="layer-dropout.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org885c9d0-split">
+
+<p>
+<a href="https://github.com/pytorch/fairseq/tree/master/examples/layerdrop">Layer dropout</a>
+</p>
+
+
+<div class="figure">
+<p><img src="img/layer-dropout-2.png" alt="layer-dropout-2.png" />
+</p>
+</div>
+
+<p>
+(Source: <a href="https://arxiv.org/pdf/1909.11556.pdf">Fan et al., 2019)</a>
+</p>
+
+</section>
+<section id="slide-org885c9d0-split">
+
+<p>
+<a href="https://github.com/pytorch/fairseq/tree/master/examples/layerdrop">Layer dropout</a>
+</p>
+
+
+<div class="figure">
+<p><img src="img/layer-dropout-2b.png" alt="layer-dropout-2b.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb713249">
+<h3 id="orgb713249">Distill</h3>
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/1yn1h2br8fBLZGSzTC/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+
+</section>
+<section id="slide-orgb713249-split">
+
+<div class="figure">
+<p><img src="img/distill1.png" alt="distill1.png" />
+</p>
+</div>
+
+
+</section>
+<section id="slide-orgb713249-split">
+
+<div class="figure">
+<p><img src="img/how-distillation-works.png" alt="how-distillation-works.png" />
+</p>
+</div>
+
+<p>
+(Source: <a href="https://www.nlp.town/blog/distilling-bert/">https://www.nlp.town/blog/distilling-bert/</a>)
+</p>
+
+
+</section>
+<section id="slide-orgb713249-split">
+
+<p>
+Results 📊
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">dataset</th>
+<th scope="col" class="org-right">cnn char hard label</th>
+<th scope="col" class="org-right">bert hard label</th>
+<th scope="col" class="org-right">student</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">task 1</td>
+<td class="org-right">92.40</td>
+<td class="org-right">95.80</td>
+<td class="org-right"><b><b>96.00</b></b></td>
+</tr>
+
+<tr>
+<td class="org-left">task 2</td>
+<td class="org-right">92.20</td>
+<td class="org-right">96.00</td>
+<td class="org-right">95.00</td>
+</tr>
+
+<tr>
+<td class="org-left">task 3</td>
+<td class="org-right">89.40</td>
+<td class="org-right">95.20</td>
+<td class="org-right">95.00</td>
+</tr>
+
+<tr>
+<td class="org-left">task 4</td>
+<td class="org-right">96.00</td>
+<td class="org-right">97.70</td>
+<td class="org-right">97.00</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+F-1 scores: the higher the better.
+</p>
+
+</section>
+<section id="slide-orgb713249-split">
+
+<p>
+Size 🗜️
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">model</th>
+<th scope="col" class="org-left">N. of params</th>
+<th scope="col" class="org-right">MB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">bert</td>
+<td class="org-left">112,305,852</td>
+<td class="org-right">429</td>
+</tr>
+
+<tr>
+<td class="org-left">cnn</td>
+<td class="org-left">5,451,654</td>
+<td class="org-right">21</td>
+</tr>
+
+<tr>
+<td class="org-left">student</td>
+<td class="org-left">5,451,654</td>
+<td class="org-right">21</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+<section id="slide-orgb713249-split">
+
+<p>
+Inference time ⏱️
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">model</th>
+<th scope="col" class="org-right">seconds/1000 instances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">cnn hard label (GPU)</td>
+<td class="org-right">1.21</td>
+</tr>
+
+<tr>
+<td class="org-left">cnn hard label (CPU)</td>
+<td class="org-right">1.71</td>
+</tr>
+
+<tr>
+<td class="org-left">BERT hard label (GPU)</td>
+<td class="org-right">9.98</td>
+</tr>
+
+<tr>
+<td class="org-left">BERT hard label (CPU)</td>
+<td class="org-right">112.06</td>
+</tr>
+
+<tr>
+<td class="org-left">student (GPU)</td>
+<td class="org-right">1.33</td>
+</tr>
+
+<tr>
+<td class="org-left">student (CPU)</td>
+<td class="org-right">1.74</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+</section>
+<section>
+<section id="slide-org0f06b26">
+<h2 id="org0f06b26">Some tips for good distillation</h2>
+<ul>
+<li class="fragment appear">pick a student who is not to big&#x2026;</li>
+<li class="fragment appear">&#x2026;but also not to small</li>
+<li class="fragment appear">it should be expressive enough to solve the problem by itself</li>
+<li class="fragment appear">use probabilities</li>
+<li class="fragment appear">augment the data as much as possible</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org95e052a">
+<h3 id="org95e052a">Pros 😍</h3>
+<ul>
+<li>no need to change the model</li>
+<li>no constraints on what operations you can use</li>
+<li>works with every pretrained model (in principle&#x2026;)</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org1b38c1f">
+<h3 id="org1b38c1f">Cons 🙄</h3>
+<ul>
+<li>you need to train a new model</li>
+
+</ul>
+
+
+
+</section>
+</section>
+<section>
+<section id="slide-orga2412f2">
+<h2 id="orga2412f2">Infrastructure</h2>
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/Lr2uwcN0svrHy/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+
+</section>
+<section id="slide-orga2412f2-split">
+
+<div class="figure">
+<p><img src="img/tfx.png" alt="tfx.png" />
+</p>
+</div>
+</section>
+<section id="slide-orga2412f2-split">
+
+<div class="figure">
+<p><img src="img/keras-vectorization.png" alt="keras-vectorization.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-orga2412f2-split">
+
+<div class="figure">
+<p><img src="img/baas.png" alt="baas.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org1d83b21">
+<h3 id="org1d83b21">Embed the preprocessing in the model</h3>
+</section>
+<section id="slide-org1d83b21-split">
+
+<div class="figure">
+<p><img src="img/carbon.png" alt="carbon.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org1d83b21-split">
+
+<div class="figure">
+<p><img src="img/infra-2.png" alt="infra-2.png" />
+</p>
+</div>
+
+
+
+</section>
+</section>
+<section>
+<section id="slide-org2cc224b">
+<h2 id="org2cc224b">Quality control</h2>
+
+<div class="figure">
+<p><img src="img/domains.png" alt="domains.png" />
+</p>
+</div>
+
+
+</section>
+<section id="slide-org2cc224b-split">
+
+<div class="figure">
+<p><img src="img/bplank.png" alt="bplank.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org2cc224b-split">
+
+<div class="figure">
+<p><img src="img/whatisadomain.png" alt="whatisadomain.png" />
+</p>
+</div>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org83d90fa">
+<h3 id="org83d90fa">Probability comes to the rescue</h3>
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/FbAjHxBrXVjuE/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<div class="figure">
+<p><img src="img/hady.png" alt="hady.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<div class="figure">
+<p><img src="img/perfpred0.png" alt="perfpred0.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<div class="figure">
+<p><img src="img/perfpreda.png" alt="perfpreda.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<p>
+\[CONF= \frac{1}{|D_t|}\sum_{i:x\in{D_s}}q_i - \frac{1}{|D_s|}\sum_{i:x\in{D_t}}q_j \]
+</p>
+
+<p>
+where \(q=max(softmax(z))^k\) and \(z\) is a logit score.
+</p>
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<div class="figure">
+<p><img src="img/performance-prediction.png" alt="performance-prediction.png" />
+</p>
+</div>
+
+
+</section>
+<section id="slide-org83d90fa-split">
+
+<p>
+data oriented vs. model oriented
+</p>
+
+
+
+
+</section>
+</section>
+<section>
+<section id="slide-orga85feac">
+<h2 id="orga85feac">tl; didn't pay attention</h2>
+<ul>
+<li class="fragment appear">train BERT, distill to a char-based CNN</li>
+<li class="fragment appear">use char-based CNNs to avoid the pipeline jungle</li>
+<li class="fragment appear">take note of the probabilities on your test split</li>
+
+</ul>
+
+</section>
+<section id="slide-orga85feac-split">
+
+<div class="figure">
+<p><img src="https://media.giphy.com/media/xThuWtYjkLvUvK4zp6/giphy.gif" alt="giphy.gif" />
+</p>
+</div>
+</section>
+</section>
+</div>
+</div>
+<p> Created by Angelo Basile. </p>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+width:1024, height:768, margin: 0.1, minScale:0.2, maxScale:2.5, transition:'none',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
