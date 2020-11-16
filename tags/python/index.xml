@@ -6,11 +6,7 @@
     <description>Recent content in python on Angelo Basile</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Jun 2017 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://anbasile.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 25 Jun 2017 00:00:00 +0000</lastBuildDate><atom:link href="https://anbasile.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Using jupyter notebooks with a virtual environment</title>
       <link>https://anbasile.github.io/posts/2017-06-25-jupyter-venv/</link>

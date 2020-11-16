@@ -6,10 +6,16 @@
     <description>Recent content in production on Angelo Basile</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://anbasile.github.io/categories/production/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Fri, 17 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://anbasile.github.io/categories/production/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Some challenges of bringing NLP models in production</title>
+      <link>https://anbasile.github.io/posts/nlp-in-production/</link>
+      <pubDate>Fri, 17 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://anbasile.github.io/posts/nlp-in-production/</guid>
+      <description>Summary &amp;ldquo;As the machine learning (ML) community continues to accumulate years of experience with live systems, a wide-spread and uncomfortable trend has emerged: developing and deploying ML systems is relatively fast and cheap, but maintaining them over time is difficult and expensive&amp;rdquo;. (Sculley, et al., 2015)
+In this talk, we are going to take a look at some problems that arise when we are ready to bring NLP models to production.</description>
+    </item>
     
     <item>
       <title>Setting up a server for NLP models in production</title>

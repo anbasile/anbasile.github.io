@@ -6,10 +6,10 @@
     
     <title>Angelo Basile  | Setting up a server for NLP models in production</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="generator" content="Hugo 0.68.3" />
+    <meta name="generator" content="Hugo 0.77.0" />
     
     
-      <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+      <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
     
 
     
@@ -35,22 +35,21 @@ Here we will see how to set up a high-performing inference server capable of run
 <meta itemprop="name" content="Setting up a server for NLP models in production">
 <meta itemprop="description" content="Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
 Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia.">
-<meta itemprop="datePublished" content="2020-03-19T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-03-19T00:00:00&#43;00:00" />
+<meta itemprop="datePublished" content="2020-03-19T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-03-19T00:00:00+00:00" />
 <meta itemprop="wordCount" content="2657">
 
 
 
-<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Setting up a server for NLP models in production"/>
 <meta name="twitter:description" content="Summary In machine learning, serving a trained model means making it available for people to use it to get predictions from their data and it is a fundamental step of bringing any NLP research outcome to production.
 Here we will see how to set up a high-performing inference server capable of running models saved in different formats. We will be using the TensorRT Inference Server (TRTIS from now on), developed by nvidia."/>
 
-      
-    
   </head>
 
-  <body class="ma0 avenir bg-near-white production">
+  <body class="ma0 avenir bg-near-white">
 
     
    
@@ -70,12 +69,6 @@ Here we will see how to set up a high-performing inference server capable of run
 
       
         <ul class="pl0 mr3">
-          
-          <li class="list f5 f4-ns fw4 dib pr3">
-            <a class="hover-white no-underline white-90" href="/presentations/" title=" page">
-              
-            </a>
-          </li>
           
           <li class="list f5 f4-ns fw4 dib pr3">
             <a class="hover-white no-underline white-90" href="/about/" title="About page">
@@ -430,7 +423,7 @@ model_status <span style="color:#f92672">{</span>
 <span style="color:#f92672">}</span>
 ready_state: SERVER_READY
 
-</code></pre></div><p>As we can see from the response, the server says that our <code>sentiment-model</code>'s status is <code>MODEL_READY</code>: perfect, we have succesfully deployed our model.</p>
+</code></pre></div><p>As we can see from the response, the server says that our <code>sentiment-model</code>&rsquo;s status is <code>MODEL_READY</code>: perfect, we have succesfully deployed our model.</p>
 <h3 id="the-config-file">The config file</h3>
 <p>The output of our query to <code>/status</code> above contains a field called <code>config</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#f92672">[</span>...<span style="color:#f92672">]</span>
@@ -554,7 +547,7 @@ response <span style="color:#f92672">=</span> requests<span style="color:#f92672
   params<span style="color:#f92672">=</span>params
   headers<span style="color:#f92672">=</span>headers,
   data<span style="color:#f92672">=</span>data)
-</code></pre></div><p>TRTIS&rsquo; response will not be json-formatted: the format of the provided output is called <a href="https://developers.google.com/protocol-buffers">protocol buffer</a> and parsing it not as straightforward as parsing json, but it&rsquo;s not that complicated either: we&rsquo;ll see how to properly parse it in another post. For now, we can just use a regular expression to capture the labels predicted by the model, so we&rsquo;ll just read the response as text:</p>
+</code></pre></div><p>TRTIS' response will not be json-formatted: the format of the provided output is called <a href="https://developers.google.com/protocol-buffers">protocol buffer</a> and parsing it not as straightforward as parsing json, but it&rsquo;s not that complicated either: we&rsquo;ll see how to properly parse it in another post. For now, we can just use a regular expression to capture the labels predicted by the model, so we&rsquo;ll just read the response as text:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># this will be either [&#39;positive&#39;] or [&#39;negative&#39;]</span>
 labels <span style="color:#f92672">=</span> (re<span style="color:#f92672">.</span>findall(<span style="color:#e6db74">&#39;(positive|negative)&#39;</span>, response<span style="color:#f92672">.</span>text) 
 </code></pre></div><p>Now we are ready to put this all together in a file called <code>query_model.py</code>: we&rsquo;ll be reading 10 instances from the test split of the IMDB dataset, the same that we used for training the model, we&rsquo;ll prepare the request, get the labels and compute the accuracy and the time it will take:</p>
